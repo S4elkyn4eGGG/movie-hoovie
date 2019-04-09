@@ -1,3 +1,5 @@
+// @flow
+
 import React, {Component} from "react";
 import {
     AppBar,
@@ -5,68 +7,41 @@ import {
     Typography,
     Button,
     Avatar,
-    Popper,
-    Grow,
-    Paper,
-    ClickAwayListener,
-    MenuList,
+    Menu,
     MenuItem,
 } from "@material-ui/core";
 import {KeyboardArrowDown} from "@material-ui/icons";
 import {withStyles} from "@material-ui/core/styles";
 import {withRouter} from "react-router-dom";
+import {TopMenuStyles} from './styles/TopMenuStyles';
 
-const styles = (theme) => ({
-    root: {
-        flexGrow: 1,
-    },
-    grow: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginLeft: -12,
-        marginRight: 15,
-    },
-    appBar: {
-        backgroundColor: "#474d59",
-    },
-    paper: {
-        marginRight: theme.spacing.unit * 2,
-    },
-    button: {
-        color: "rgb(175,177,184)",
-        borderColor: "rgb(175,177,184)",
-        textTransform: "none",
-        "&:focus": {
-            outline: "none",
-        },
-    },
-    extendedIcon: {
-        marginLeft: theme.spacing.unit,
-        fontSize: 26,
-    },
-});
+const styles = (theme) => (TopMenuStyles(theme));
 
-class TopMenu extends Component {
+type PropsType = {
+    classes: Object,
+};
+
+type StateType = {
+    anchorEl: ?HTMLElement,
+};
+
+class TopMenu extends Component<PropsType,StateType> {
     state = {
-        open: false,
+        anchorEl: null,
     };
 
-    handleToggle = () => {
-        this.setState((state) => ({open: !state.open}));
+    handleClick = event => {
+        this.setState({ anchorEl: event.currentTarget });
     };
 
-    handleClose = (event) => {
-        if (this.anchorEl.contains(event.target)) {
-            return;
-        }
-
-        this.setState({open: false});
+    handleClose = () => {
+        this.setState({ anchorEl: null });
     };
 
     render() {
         const {classes} = this.props;
-        const {open} = this.state;
+        const {anchorEl} = this.state;
+
         return (
             <div className={classes.root}>
                 <AppBar position="sticky" className={classes.appBar}>
@@ -83,42 +58,25 @@ class TopMenu extends Component {
                         <React.Fragment>
                             <Button
                                 focused
-                                buttonRef={(node) => {
-                                    this.anchorEl = node;
-                                }}
                                 variant="outlined"
-                                aria-owns={open ? "menu-list-grow" : undefined}
-                                aria-haspopup="true"
-                                onClick={this.handleToggle}
                                 className={classes.button}
-                                disableFocusRipple={true}
-                                disableRipple={true}
+                                aria-owns={anchorEl ? 'simple-menu' : undefined}
+                                aria-haspopup="true"
+                                onClick={this.handleClick}
                             >
-                                My Account
+                                <span className={classes.buttonText}>My Account</span>
                                 <KeyboardArrowDown className={classes.extendedIcon} />
                             </Button>
-                            <Popper open={open} anchorEl={this.anchorEl} transition disablePortal>
-                                {({TransitionProps}) => (
-                                    <Grow
-                                        {...TransitionProps}
-                                        id="menu-list-grow"
-                                        style={{
-                                            marginTop: 5,
-                                            transformOrigin: "center bottom",
-                                        }}
-                                    >
-                                        <Paper>
-                                            <ClickAwayListener onClickAway={this.handleClose}>
-                                                <MenuList>
-                                                    <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-                                                    <MenuItem onClick={this.handleClose}>My account</MenuItem>
-                                                    <MenuItem onClick={this.handleClose}>Logout</MenuItem>
-                                                </MenuList>
-                                            </ClickAwayListener>
-                                        </Paper>
-                                    </Grow>
-                                )}
-                            </Popper>
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={this.handleClose}
+                                className={classes.buttonMenu}
+                                disableAutoFocusItem={true}
+                            >
+                                <MenuItem onClick={this.handleClose}>My Favorite</MenuItem>
+                            </Menu>
                         </React.Fragment>
                     </Toolbar>
                 </AppBar>
